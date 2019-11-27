@@ -15,11 +15,11 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.1f), 
 	int i;
 	for (i = 0; i < MUNCHIECOUNT; i++)
 	{
-		//srand(time(NULL));
+		srand(time(NULL));
 		_munchies[i] = new Enemy();
-		_munchies[i]->frameCount = /*rand() %*/ 1;
+		_munchies[i]->frameCount = rand() % 1;
 		_munchies[i]->currentFrameTime = 0;
-		_munchies[i]->frameTime = /*rand() %*/ 500/* + 50*/;
+		_munchies[i]->frameTime = rand() % 500 + 50;
 	}
 
 	//Initialise ghost character
@@ -135,7 +135,7 @@ void Pacman::LoadContent()
 			_ghosts[i]->texture->Load("Textures/GhostBlue.png", false);
 		else
 			_ghosts[i]->texture->Load("Textures/GhostOrange.png", false);
-		_ghosts[i]->position = new Vector2((rand() % Graphics::GetViewportWidth()), (rand() % Graphics::GetViewportHeight()));
+		_ghosts[i]->position = new Vector2((rand() % Graphics::GetViewportWidth()), (rand() % Graphics::GetViewportHeight() - 20));
 		_ghosts[i]->sourceRect = new Rect(0.0f, 0.0f, 20, 20);
 	}
 
