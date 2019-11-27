@@ -15,11 +15,11 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.1f), 
 	int i;
 	for (i = 0; i < MUNCHIECOUNT; i++)
 	{
-		srand(time(NULL));
+		//srand(time(NULL));
 		_munchies[i] = new Enemy();
-		_munchies[i]->frameCount = rand() % 3 + 1;
+		_munchies[i]->frameCount = /*rand() %*/ 1;
 		_munchies[i]->currentFrameTime = 0;
-		_munchies[i]->frameTime = rand() % 500 + 50;
+		_munchies[i]->frameTime = /*rand() %*/ 500/* + 50*/;
 	}
 
 	//Initialise ghost character
@@ -56,7 +56,7 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.1f), 
 		std::cout << "Audio is not initialsied" << std::endl;
 
 	//Initialise important Game aspects
-	Graphics::Initialise(argc, argv, this, 1024, 768, false, 25, 25, "Pacman", 60);
+	Graphics::Initialise(argc, argv, this, 1024, 768, false, 25, 25, "Pacman", 60); // 1024x768
 	Input::Initialise();
 
 	// Start the Game Loop - This calls Update and Draw in game loop
