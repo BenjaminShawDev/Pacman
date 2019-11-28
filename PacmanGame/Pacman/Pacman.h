@@ -60,7 +60,7 @@ private:
 	void CheckPaused(Input::KeyboardState* state, Input::Keys pauseKey);
 	void CheckViewportCollision();
 	void UpdatePacman(int elapsedTime);
-	void UpdateMunchie(Enemy*, int elapsedTime);
+	void UpdateMunchie(Enemy*& refMunchie, int elapsedTime);
 	void CheckGhostCollision();
 	void UpdateGhost(MovingEnemy*, int elapsedTime);
 
@@ -86,7 +86,8 @@ private:
 	const int _cPacmanFrameTime;
 
 	// Data to represent Munchie
-	Enemy* _munchies[MUNCHIECOUNT];
+	Enemy** _munchies;
+	int munchieCount;
 	Enemy* _cherry;
 	MovingEnemy* _ghosts[GHOSTCOUNT];
 
@@ -100,7 +101,7 @@ private:
 
 public:
 	/// <summary> Constructs the Pacman class. </summary>
-	Pacman(int argc, char* argv[]);
+	Pacman(int argc, char* argv[], int munchieCount);
 
 	/// <summary> Destroys any data associated with Pacman class. </summary>
 	virtual ~Pacman();

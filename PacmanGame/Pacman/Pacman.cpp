@@ -4,18 +4,22 @@
 #include <iostream>
 
 
-Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.1f), _cPacmanFrameTime(250)
+Pacman::Pacman(int argc, char* argv[], int munchieCount) : Game(argc, argv), _cPacmanSpeed(0.1f), _cPacmanFrameTime(250)
 {
 	// Initialise member varivables
 	_pacman = new Player();
 	_pacman->dead = false;
-	//_munchie = new Munchie();
+
+	this->munchieCount = munchieCount;
+
+	_munchies = new Enemy*[munchieCount];
 
 	// Local variable
+	srand(time(NULL));
+
 	int i;
-	for (i = 0; i < MUNCHIECOUNT; i++)
+	for (i = 0; i < munchieCount; i++)
 	{
-		srand(time(NULL));
 		_munchies[i] = new Enemy();
 		_munchies[i]->frameCount = rand() % 1;
 		_munchies[i]->currentFrameTime = 0;
@@ -27,7 +31,7 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.1f), 
 	{
 		_ghosts[i] = new MovingEnemy();
 		_ghosts[i]->direction = 0;
-		_ghosts[i]->speed = 0.1f;
+		_ghosts[i]->speed = 0.2f;
 	}
 
 	_cherry = new Enemy();
@@ -70,7 +74,7 @@ Pacman::~Pacman()
 	delete _pacman->sourceRect;
 	delete _pacman;
 
-	for (int i = 0; i < MUNCHIECOUNT; i++)
+	for (int i = 0; i < munchieCount; i++)
 	{
 		delete _munchies[i]->texture;
 		delete _munchies[i]->sourceRect;
@@ -108,7 +112,7 @@ void Pacman::LoadContent()
 
 	Texture2D* munchieTex = new Texture2D();
 	munchieTex->Load("Textures/Munchie.png", false);
-	for (int i = 0; i < MUNCHIECOUNT; i++)
+	for (int i = 0; i < munchieCount; i++)
 	{
 		_munchies[i]->texture = new Texture2D();
 		_munchies[i]->texture = munchieTex;
@@ -181,7 +185,7 @@ void Pacman::Update(int elapsedTime)
 		UpdatePacman(elapsedTime);
 		CheckGhostCollision();
 
-		for (int i = 0; i < MUNCHIECOUNT; i++)
+		for (int i = 0; i < munchieCount; i++)
 		{
 			UpdateMunchie(_munchies[i], elapsedTime);
 		}
@@ -308,9 +312,9 @@ void Pacman::UpdatePacman(int elaspedTime)
 	_pacman->sourceRect->X = _pacman->sourceRect->Width * _pacman->frame;
 }
 
-void Pacman::UpdateMunchie(Enemy*, int elapsedTime)
+void Pacman::UpdateMunchie(Enemy*& refMunchie, int elapsedTime)
 {
-	for (int i = 0; i < MUNCHIECOUNT; i++)
+	for (int i = 0; i < munchieCount; i++)
 	{
 		if (!_paused)
 			_munchies[i]->currentFrameTime += elapsedTime;
@@ -354,7 +358,7 @@ void Pacman::UpdateMunchie(Enemy*, int elapsedTime)
 	int top1 = _pacman->position->Y;
 	int top2 = 0;
 
-	for (i = 0; i < MUNCHIECOUNT; i++)
+	for (i = 0; i < munchieCount; i++)
 	{
 		// Populate variables with Ghost data
 		bottom2 = _munchies[i]->position->Y + _munchies[i]->sourceRect->Height;
@@ -454,7 +458,7 @@ void Pacman::Draw(int elapsedTime)
 		SpriteBatch::Draw(_pacman->texture, _pacman->position, _pacman->sourceRect); // Draws Pacman
 	}
 
-	for (int i = 0; i < MUNCHIECOUNT; i++)
+	for (int i = 0; i < munchieCount; i++)
 	{
 		if (_munchies[i]->frameCount == 0)
 		{
