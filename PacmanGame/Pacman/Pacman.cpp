@@ -27,7 +27,7 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.1f), 
 	{
 		_ghosts[i] = new MovingEnemy();
 		_ghosts[i]->direction = 0;
-		_ghosts[i]->speed = 0.2f;
+		_ghosts[i]->speed = 0.1f;
 	}
 
 	_cherry = new Enemy();
@@ -372,11 +372,19 @@ void Pacman::UpdateMunchie(Enemy*, int elapsedTime)
 
 void Pacman::UpdateGhost(MovingEnemy* ghost, int elapsedTime)
 {
+
 	if (ghost->direction == 0) // Moves Right
 		ghost->position->X += ghost->speed * elapsedTime;
 
 	else if (ghost->direction == 1) // Moves Left
 		ghost->position->X -= ghost->speed * elapsedTime;
+
+	else if (ghost->direction == 2) // Moves Up?
+		ghost->position->Y -= ghost->speed * elapsedTime;
+
+	else if (ghost->direction == 3) // Moves Down?
+		ghost->position->Y += ghost->speed * elapsedTime;
+
 
 	if (ghost->position->X + ghost->sourceRect->Width >= Graphics::GetViewportWidth()) // Hits right edge
 	{
@@ -388,6 +396,18 @@ void Pacman::UpdateGhost(MovingEnemy* ghost, int elapsedTime)
 	{
 		ghost->direction = 0; // Change direction
 		ghost->sourceRect->X = ghost->sourceRect->Width * ghost->direction;
+	}
+
+	if (ghost->position->Y + ghost->sourceRect->Width >= Graphics::GetViewportHeight()) // Hits bottom edge
+	{
+		ghost->direction = 2; // Change direction
+		ghost->sourceRect->Y = ghost->sourceRect->Width * ghost->direction;
+	}
+
+	else if (ghost->position->Y <= 0) // Hits Left Edge
+	{
+		ghost->direction = 3; // Change direction
+		ghost->sourceRect->Y = ghost->sourceRect->Width * ghost->direction;
 	}
 }
 

@@ -14,6 +14,7 @@ C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\S2D\Input.h(108): message
 C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\S2D\Input.h(108): message :         [
 C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\S2D\Input.h(108): message :             _Ty=S2D::Input::Keys
 C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\S2D\Input.h(108): message :         ]
+C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\Pacman.cpp(18,13): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
 C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\Pacman.cpp(79,20): warning C4154: deletion of an array expression; conversion to pointer supplied
 C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\Pacman.cpp(92,16): warning C4156: deletion of an array expression without using the array form of 'delete'; array form substituted
 C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\Pacman.cpp(92,16): warning C4154: deletion of an array expression; conversion to pointer supplied
@@ -41,14 +42,16 @@ C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\Pacman.cpp(360,39): warni
 C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\Pacman.cpp(361,33): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
 C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\Pacman.cpp(362,38): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
 C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\Pacman.cpp(363,32): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\Pacman.cpp(384,51): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\Pacman.cpp(390,51): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\Pacman.cpp(398,14): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\Pacman.cpp(400,12): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\Pacman.cpp(402,13): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\Pacman.cpp(404,11): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\Pacman.cpp(410,37): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\Pacman.cpp(411,31): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\Pacman.cpp(412,36): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\Pacman.cpp(413,30): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\Pacman.cpp(392,51): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\Pacman.cpp(398,51): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\Pacman.cpp(404,51): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\Pacman.cpp(410,51): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\Pacman.cpp(418,14): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\Pacman.cpp(420,12): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\Pacman.cpp(422,13): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\Pacman.cpp(424,11): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\Pacman.cpp(430,37): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\Pacman.cpp(431,31): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\Pacman.cpp(432,36): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Pacman\Pacman.cpp(433,30): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
   Pacman.vcxproj -> C:\Users\Ben\Documents\GitHub\Pacman\PacmanGame\Debug\Pacman.exe
