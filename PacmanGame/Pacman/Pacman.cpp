@@ -15,15 +15,15 @@ Pacman::Pacman(int argc, char* argv[], int munchieCount) : Game(argc, argv), _cP
 	_munchies = new Enemy*[munchieCount];
 
 	// Local variable
-	srand(time(NULL));
+	//srand(time(NULL));
 
 	int i;
 	for (i = 0; i < munchieCount; i++)
 	{
 		_munchies[i] = new Enemy();
-		_munchies[i]->frameCount = rand() % 1;
+		_munchies[i]->frameCount = 0;
 		_munchies[i]->currentFrameTime = 0;
-		_munchies[i]->frameTime = rand() % 500 + 50;
+		_munchies[i]->frameTime = 5000;
 	}
 
 	//Initialise ghost character
@@ -405,13 +405,13 @@ void Pacman::UpdateGhost(MovingEnemy* ghost, int elapsedTime)
 	if (ghost->position->Y + ghost->sourceRect->Width >= Graphics::GetViewportHeight()) // Hits bottom edge
 	{
 		ghost->direction = 2; // Change direction
-		ghost->sourceRect->Y = ghost->sourceRect->Width * ghost->direction;
+		ghost->sourceRect->X = ghost->sourceRect->Width * ghost->direction;
 	}
 
 	else if (ghost->position->Y <= 0) // Hits Left Edge
 	{
 		ghost->direction = 3; // Change direction
-		ghost->sourceRect->Y = ghost->sourceRect->Width * ghost->direction;
+		ghost->sourceRect->X = ghost->sourceRect->Width * ghost->direction;
 	}
 }
 
