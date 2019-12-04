@@ -3,9 +3,27 @@
 #include <sstream>
 #include <iostream>
 
-
 Pacman::Pacman(int argc, char* argv[], int munchieCount) : Game(argc, argv), _cPacmanSpeed(0.1f), _cPacmanFrameTime(250)
 {
+	int screenResolutionChoice;
+	int screenResolutionX;
+	int screenResolutionY;
+
+	std::cout << "Select a screen resolution: (1) 1080p, (2) 720p" << std::endl;
+	cin >> screenResolutionChoice;
+
+	if (screenResolutionChoice == 1)
+	{
+		screenResolutionX = 1920;
+		screenResolutionY = 1080;
+	}
+
+	else
+	{
+		screenResolutionX = 1280;
+		screenResolutionY = 720;
+	}
+
 	// Initialise member varivables
 	_pacman = new Player();
 	_pacman->dead = false;
@@ -15,7 +33,6 @@ Pacman::Pacman(int argc, char* argv[], int munchieCount) : Game(argc, argv), _cP
 	_munchies = new Enemy*[munchieCount];
 
 	// Local variable
-	//srand(time(NULL));
 
 	int i;
 	for (i = 0; i < munchieCount; i++)
@@ -31,18 +48,24 @@ Pacman::Pacman(int argc, char* argv[], int munchieCount) : Game(argc, argv), _cP
 	{
 		_ghosts[i] = new MovingEnemy();
 		_ghosts[i]->direction = 0;
-		_ghosts[i]->speed = 0.2f;
+		_ghosts[i]->speed = 1.0f;
 	}
 
 	_cherry = new Enemy();
 	_cherry->frameCount = 0;
 	_cherry->currentFrameTime = 0;
-	_cherry->frameTime = 500;
+	_cherry->frameTime = 5000;
+
+	_playerBox = new Enemy();
 
 	_paused = false;
 	_pKeyDown = false;
 	_isStartup = true;
 	_cKeyDown = false;
+	_startupGhostDirection = true;
+	_powerUpActive = false;
+	_playerScore = 0;
+	_cherryPowerUpTime = 30000;
 
 	_pacman->currentTimeFrame = 0;
 	_pacman->direction = 0;
@@ -60,7 +83,7 @@ Pacman::Pacman(int argc, char* argv[], int munchieCount) : Game(argc, argv), _cP
 		std::cout << "Audio is not initialsied" << std::endl;
 
 	//Initialise important Game aspects
-	Graphics::Initialise(argc, argv, this, 1024, 768, false, 25, 25, "Pacman", 60); // 1024x768
+	Graphics::Initialise(argc, argv, this, screenResolutionX, screenResolutionY, true, 25, 25, "Pacman", 60); // 1024x768
 	Input::Initialise();
 
 	// Start the Game Loop - This calls Update and Draw in game loop
@@ -95,6 +118,11 @@ Pacman::~Pacman()
 	}
 	delete _ghosts;
 
+	delete _playerBox->position;
+	delete _playerBox->texture;
+	delete _playerBox->sourceRect;
+	delete _playerBox;
+
 	delete _pop;
 	delete _backgroundMusic;
 	delete _pacmanDeath;
@@ -124,8 +152,16 @@ void Pacman::LoadContent()
 	cherryTex->Load("Textures/Cherry.png", false);
 	_cherry->texture = new Texture2D();
 	_cherry->texture = cherryTex;
-	_cherry->position = new Vector2(150.0f, 150.0f);
+	_cherry->position = new Vector2(Graphics::GetViewportWidth() - 100, Graphics::GetViewportHeight() - 100);
 	_cherry->sourceRect = new Rect(0.0f, 0.0f, 32, 32);
+
+	// Load moveable box
+	Texture2D* boxTex = new Texture2D();
+	boxTex->Load("Textures/Box.png", false);
+	_playerBox->texture = new Texture2D();
+	_playerBox->texture = boxTex;
+	_playerBox->position = new Vector2(100.0f, 100.0f);
+	_playerBox->sourceRect = new Rect(0.0f, 0.0f, 32, 32);
 
 	// Initialise ghost character
 	for (int i = 0; i < GHOSTCOUNT; i++)
@@ -196,12 +232,20 @@ void Pacman::Update(int elapsedTime)
 		{
 			UpdateGhost(_ghosts[i], elapsedTime);
 		}
+
+		if (_playerScore == munchieCount)
+			_paused = true;
 	}
 }
 
 void Pacman::Input(int elapsedTime, Input::KeyboardState* keyboardState, Input::MouseState* mouseState)
 {
 	float pacmanSpeed = _cPacmanSpeed * elapsedTime * _pacman->speedMultiplier;
+
+	if (keyboardState->IsKeyDown(Input::Keys::ESCAPE))
+	{
+		exit(0);
+	}
 
 	if (!_pacman->dead)
 	{
@@ -236,19 +280,16 @@ void Pacman::Input(int elapsedTime, Input::KeyboardState* keyboardState, Input::
 			_pacman->speedMultiplier = 1.0f;
 		}
 
-		if (keyboardState->IsKeyDown(Input::Keys::R) && _cKeyDown == false)
-		{
-			_cherry->position = new Vector2((rand() % Graphics::GetViewportWidth()), (rand() % Graphics::GetViewportHeight()));
-			_cKeyDown = true;
-		}
-
-		else if (keyboardState->IsKeyUp(Input::Keys::R) && _cKeyDown == true)
-			_cKeyDown = false;
-
 		if (mouseState->LeftButton == Input::ButtonState::PRESSED)
 		{
 			_cherry->position->X = mouseState->X;
 			_cherry->position->Y = mouseState->Y;
+		}
+
+		if (mouseState->RightButton == Input::ButtonState::PRESSED)
+		{
+			_playerBox->position->X = mouseState->X - 16;
+			_playerBox->position->Y = mouseState->Y - 16;
 		}
 	}
 }
@@ -348,7 +389,6 @@ void Pacman::UpdateMunchie(Enemy*& refMunchie, int elapsedTime)
 	_cherry->sourceRect->X = _cherry->sourceRect->Width * _cherry->frameCount;
 
 	// Collision with munchie
-	int i = 0;
 	int bottom1 = _pacman->position->Y + _pacman->sourceRect->Height;
 	int bottom2 = 0;
 	int left1 = _pacman->position->X;
@@ -358,7 +398,7 @@ void Pacman::UpdateMunchie(Enemy*& refMunchie, int elapsedTime)
 	int top1 = _pacman->position->Y;
 	int top2 = 0;
 
-	for (i = 0; i < munchieCount; i++)
+	for (int i = 0; i < munchieCount; i++)
 	{
 		// Populate variables with Ghost data
 		bottom2 = _munchies[i]->position->Y + _munchies[i]->sourceRect->Height;
@@ -370,12 +410,50 @@ void Pacman::UpdateMunchie(Enemy*& refMunchie, int elapsedTime)
 		{
 			Audio::Play(_pop);
 			_munchies[i]->position = new Vector2(-150.0f, -150.0f);
+			_playerScore++;
 		}
 	}
+
+	// Collision with cherry
+	int cherryBottom1 = _pacman->position->Y + _pacman->sourceRect->Height;
+	int cherryBottom2 = _cherry->position->Y + _cherry->sourceRect->Height;
+	int cherryLeft1 = _pacman->position->X;
+	int cherryLeft2 = _cherry->position->X;
+	int cherryRight1 = _pacman->position->X + _pacman->sourceRect->Width;
+	int cherryRight2 = _cherry->position->X + _cherry->sourceRect->Width;
+	int cherryTop1 = _pacman->position->Y;
+	int cherryTop2 = _cherry->position->Y;
+
+	if ((cherryBottom1 > cherryTop2) && (cherryTop1 < cherryBottom2) && (cherryRight1 > cherryLeft2) && (cherryLeft1 < cherryLeft2))
+	{
+		Audio::Play(_pop);
+		_cherry->position = new Vector2(-150.0f, -150.0f);
+		_powerUpActive = true;
+		for (int i = 0; i < GHOSTCOUNT; i++)
+			_ghosts[i]->speed = 0.1f;
+	}
+
+	if (_powerUpActive && _cherryPowerUpTime != 0)
+		_cherryPowerUpTime--;
+	else
+	{
+		for (int i = 0; i < GHOSTCOUNT; i++)
+			_ghosts[i]->speed = 1.0f;
+		_powerUpActive = false;
+		_cherryPowerUpTime = 30000;
+	}
+
 }
 
 void Pacman::UpdateGhost(MovingEnemy* ghost, int elapsedTime)
 {
+	if (_startupGhostDirection)
+	{
+		for (int i = 0; i <= 3; i++)
+			_ghosts[i]->direction = i;
+		_startupGhostDirection = false;
+	}
+	
 
 	if (ghost->direction == 0) // Moves Right
 		ghost->position->X += ghost->speed * elapsedTime;
@@ -394,24 +472,28 @@ void Pacman::UpdateGhost(MovingEnemy* ghost, int elapsedTime)
 	{
 		ghost->direction = 1; // Change direction
 		ghost->sourceRect->X = ghost->sourceRect->Width * ghost->direction;
+		ghost->position->Y = rand() % Graphics::GetViewportHeight();
 	}
 
 	else if (ghost->position->X <= 0) // Hits Left Edge
 	{
 		ghost->direction = 0; // Change direction
 		ghost->sourceRect->X = ghost->sourceRect->Width * ghost->direction;
+		ghost->position->Y = rand() % Graphics::GetViewportHeight();
 	}
 
 	if (ghost->position->Y + ghost->sourceRect->Width >= Graphics::GetViewportHeight()) // Hits bottom edge
 	{
 		ghost->direction = 2; // Change direction
 		ghost->sourceRect->X = ghost->sourceRect->Width * ghost->direction;
+		ghost->position->X = rand() % Graphics::GetViewportWidth();
 	}
 
 	else if (ghost->position->Y <= 0) // Hits Left Edge
 	{
 		ghost->direction = 3; // Change direction
 		ghost->sourceRect->X = ghost->sourceRect->Width * ghost->direction;
+		ghost->position->X = rand() % Graphics::GetViewportWidth();
 	}
 }
 
@@ -421,12 +503,16 @@ void Pacman::CheckGhostCollision()
 	int i = 0;
 	int bottom1 = _pacman->position->Y + _pacman->sourceRect->Height;
 	int bottom2 = 0;
+	int boxBottom = _playerBox->position->Y + _playerBox->sourceRect->Height;;
 	int left1 = _pacman->position->X;
 	int left2 = 0;
+	int boxLeft = _playerBox->position->X;
 	int right1 = _pacman->position->X + _pacman->sourceRect->Width;
 	int right2 = 0;
+	int boxRight = _playerBox->position->X + _playerBox->sourceRect->Width;
 	int top1 = _pacman->position->Y;
 	int top2 = 0;
+	int boxTop = _playerBox->position->Y;
 
 	for (i = 0; i < GHOSTCOUNT; i++)
 	{
@@ -443,6 +529,19 @@ void Pacman::CheckGhostCollision()
 			_pacman->dead = true;
 			i = GHOSTCOUNT;
 		}
+
+		if ((boxBottom > top2) && (boxTop < bottom2) && (boxRight > left2) && (boxLeft < right2))
+		{
+			if (_ghosts[i]->direction == 0)
+				_ghosts[i]->direction = 1;
+			else if (_ghosts[i]->direction == 1)
+				_ghosts[i]->direction = 0;
+			else if (_ghosts[i]->direction == 2)
+				_ghosts[i]->direction = 3;
+			else
+				_ghosts[i]->direction = 2;
+		}
+
 	}
 }
 
@@ -450,7 +549,7 @@ void Pacman::Draw(int elapsedTime)
 {
 	// Allows us to easily create a string
 	std::stringstream stream;
-	stream << "Pacman X: " << _pacman->position->X << " Y: " << _pacman->position->Y;
+	stream << "Pacman X: " << _pacman->position->X << " Y: " << _pacman->position->Y << std::endl << "Score:" << _playerScore;
 
 	SpriteBatch::BeginDraw(); // Starts Drawing
 	if (!_pacman->dead)
@@ -485,6 +584,8 @@ void Pacman::Draw(int elapsedTime)
 		if (_cherry->frameCount >= 60)
 			_cherry->frameCount = 0;
 	}
+
+	SpriteBatch::Draw(_playerBox->texture, _playerBox->position, _playerBox->sourceRect, Vector2::Zero, 1.0f, 0.0f, Color::White, SpriteEffect::NONE);
 
 	//Draw ghosts
 	for (int i = 0; i < GHOSTCOUNT; i++)

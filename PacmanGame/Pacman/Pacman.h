@@ -84,12 +84,19 @@ private:
 	// Data to represent Pacman
 	Player* _pacman;
 	const int _cPacmanFrameTime;
+	int _playerScore;
 
 	// Data to represent Munchie
 	Enemy** _munchies;
 	int munchieCount;
 	Enemy* _cherry;
 	MovingEnemy* _ghosts[GHOSTCOUNT];
+	bool _startupGhostDirection;
+	bool _powerUpActive;
+	int _cherryPowerUpTime;
+
+	// Data to represet moveable box
+	Enemy* _playerBox;
 
 	// Position for String
 	Vector2* _stringPosition;
