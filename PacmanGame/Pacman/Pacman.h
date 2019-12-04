@@ -85,6 +85,8 @@ private:
 	Player* _pacman;
 	const int _cPacmanFrameTime;
 	int _playerScore;
+	bool _isPlayerMetal; // Pill powerup
+	int _playerLives;
 
 	// Data to represent Munchie
 	Enemy** _munchies;
@@ -92,11 +94,13 @@ private:
 	Enemy* _cherry;
 	MovingEnemy* _ghosts[GHOSTCOUNT];
 	bool _startupGhostDirection;
-	bool _powerUpActive;
+	bool _cherryPowerUpActive;
 	int _cherryPowerUpTime;
+	Enemy* _pill;
 
 	// Data to represet moveable box
 	Enemy* _playerBox;
+	bool _playerInsideBox;
 
 	// Position for String
 	Vector2* _stringPosition;
@@ -105,6 +109,7 @@ private:
 	SoundEffect* _backgroundMusic;
 	SoundEffect* _pop;
 	SoundEffect* _pacmanDeath;
+	SoundEffect* _metalClang;
 
 public:
 	/// <summary> Constructs the Pacman class. </summary>
