@@ -164,12 +164,12 @@ void Pacman::LoadContent()
 	{
 		_munchies[i]->texture = new Texture2D();
 		_munchies[i]->texture = munchieTex;
-		_munchies[i]->position = new Vector2((rand() % Graphics::GetViewportWidth() + 30), (rand() % Graphics::GetViewportHeight() + 30));
+		_munchies[i]->position = new Vector2(rand() % Graphics::GetViewportWidth(), rand() % Graphics::GetViewportHeight());
 		for (int j = 1; j <= i; j++)
 		{
 			// Stop munchies overlapping
 			if ((_munchies[i]->position->Y - _munchies[j]->position->Y) < 100 || (_munchies[i]->position->Y - _munchies[j]->position->Y) < -100 || (_munchies[i]->position->X - _munchies[j]->position->X) < 100 || (_munchies[i]->position->X - _munchies[j]->position->X) < -100)
-				_munchies[i]->position = new Vector2((rand() % Graphics::GetViewportWidth() + 30), (rand() % Graphics::GetViewportHeight() + 30));
+				_munchies[i]->position = new Vector2(rand() % Graphics::GetViewportWidth(), rand() % Graphics::GetViewportHeight());
 		}
 		cout << "Munchie " << i << " X:" << _munchies[i]->position->X << " Y: " << _munchies[i]->position->Y << endl;
 		_munchies[i]->sourceRect = new Rect(12.0f, 12.0f, 12, 12);
@@ -465,6 +465,7 @@ void Pacman::UpdateMunchie(Enemy*& refMunchie, int elapsedTime)
 		{
 			Audio::Play(_pop);
 			_munchies[i]->position = new Vector2(-150.0f, -150.0f);
+			cout << "Moved Munchie " << i << endl;
 			_playerScore++;
 		}
 	}
