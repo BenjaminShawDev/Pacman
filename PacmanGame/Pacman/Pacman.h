@@ -74,12 +74,22 @@ private:
 	bool _paused;
 	bool _pKeyDown;
 	bool _cKeyDown;
+	bool _playerWon;
 
 	// Data for startup
 	Texture2D* _startupBackground;
 	Rect* _startupRectangle;
 	Vector2* _startupStringPosition;
-	bool _isStartup; // Is Pacman starting up for the first time
+	bool _isStartup; // Is the game starting up for the first time
+	bool _hasPlayerMoved;
+
+	// Data for endscreen
+	Texture2D* _endScreenBackground;
+	Rect* _endScreenRectangle;
+
+	// Date for game over screen
+	Texture2D* _gameOverBackground;
+	Rect* _gameOverRectangle;
 
 	// Data to represent Pacman
 	Player* _pacman;
@@ -94,7 +104,7 @@ private:
 	Enemy* _cherry;
 	MovingEnemy* _ghosts[GHOSTCOUNT];
 	bool _startupGhostDirection;
-	bool _cherryPowerUpActive;
+	bool _powerUpActive;
 	int _cherryPowerUpTime;
 	Enemy* _pill;
 
@@ -110,6 +120,8 @@ private:
 	SoundEffect* _pop;
 	SoundEffect* _pacmanDeath;
 	SoundEffect* _metalClang;
+	SoundEffect* _eatCherry;
+	SoundEffect* _screenWrapAround;
 
 public:
 	/// <summary> Constructs the Pacman class. </summary>
