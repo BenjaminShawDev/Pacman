@@ -67,6 +67,8 @@ private:
 	// Constant data for game variables
 	const float _cPacmanSpeed;
 
+	bool _gameLoop = true;
+
 	// Data for menu
 	Texture2D* _menuBackground;
 	Rect* _menuRectangle;
@@ -79,7 +81,6 @@ private:
 	// Data for startup
 	Texture2D* _startupBackground;
 	Rect* _startupRectangle;
-	Vector2* _startupStringPosition;
 	bool _isStartup; // Is the game starting up for the first time
 	bool _hasPlayerMoved;
 
@@ -95,7 +96,7 @@ private:
 	Player* _pacman;
 	const int _cPacmanFrameTime;
 	int _playerScore;
-	bool _isPlayerMetal; // Pill powerup
+	bool _isPlayerMetal;
 	int _playerLives;
 
 	// Data to represent Munchie
@@ -111,6 +112,7 @@ private:
 	// Data to represet moveable box
 	Enemy* _playerBox;
 	bool _playerInsideBox;
+	int _timeBetweenBoxCols;
 
 	// Position for String
 	Vector2* _stringPosition;
