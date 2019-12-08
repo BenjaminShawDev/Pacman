@@ -106,7 +106,7 @@ private:
 	MovingEnemy* _ghosts[GHOSTCOUNT];
 	bool _startupGhostDirection;
 	bool _powerUpActive;
-	int _cherryPowerUpTime;
+	int _powerUpTime;
 	Enemy* _pill;
 
 	// Data to represet moveable box
