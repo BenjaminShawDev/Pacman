@@ -80,7 +80,7 @@ Pacman::Pacman(int argc, char* argv[], int munchieCount) : Game(argc, argv), _cP
 		srand(time(NULL));
 
 		//Initialise important Game aspects
-		Graphics::Initialise(argc, argv, this, 1920, 1080, false, 25, 25, "Pacman", 60);
+		Graphics::Initialise(argc, argv, this, 1920, 1080, true, 25, 25, "Pacman", 60);
 		Input::Initialise();
 
 		// Start the Game Loop - This calls Update and Draw in game loop
@@ -160,7 +160,11 @@ void Pacman::LoadContent()
 		for (int j = 1; j <= i; j++)
 		{
 			// Stop munchies overlapping
-			if ((_munchies[i]->position->Y - _munchies[j]->position->Y) < 100 || (_munchies[i]->position->Y - _munchies[j]->position->Y) < -100 || (_munchies[i]->position->X - _munchies[j]->position->X) < 100 || (_munchies[i]->position->X - _munchies[j]->position->X) < -100)
+			if ((_munchies[i]->position->Y - _munchies[j]->position->Y) < 150 || (_munchies[i]->position->Y - _munchies[j]->position->Y) < -150 || (_munchies[i]->position->X - _munchies[j]->position->X) < 150 || (_munchies[i]->position->X - _munchies[j]->position->X) < -150)
+				_munchies[i]->position = new Vector2(rand() % 1900 + 10, rand() % 1050 + 10);
+			if ((_munchies[i]->position->Y - _munchies[j]->position->Y) < 150 || (_munchies[i]->position->Y - _munchies[j]->position->Y) < -150 || (_munchies[i]->position->X - _munchies[j]->position->X) < 150 || (_munchies[i]->position->X - _munchies[j]->position->X) < -150)
+				_munchies[i]->position = new Vector2(rand() % 1900 + 10, rand() % 1050 + 10);
+			if ((_munchies[i]->position->Y - _munchies[j]->position->Y) < 150 || (_munchies[i]->position->Y - _munchies[j]->position->Y) < -150 || (_munchies[i]->position->X - _munchies[j]->position->X) < 150 || (_munchies[i]->position->X - _munchies[j]->position->X) < -150)
 				_munchies[i]->position = new Vector2(rand() % 1900 + 10, rand() % 1050 + 10);
 		}
 		_munchies[i]->sourceRect = new Rect(12.0f, 12.0f, 12, 12);
@@ -552,7 +556,7 @@ void Pacman::UpdateMunchie(Enemy*& refMunchie, int elapsedTime)
 	int skullLeft = _skullDebuff->position->X;
 	int skullRight = _skullDebuff->position->X + _skullDebuff->sourceRect->Width;
 	int skullTop = _skullDebuff->position->Y;
-	if ((bottom1 > skullTop) && (top1 < skullBottom) && (right1 > skullLeft) && (left1 < skullLeft + 23) && !_powerUpActive)
+	if ((bottom1 > skullTop) && (top1 < skullBottom) && (right1 > skullLeft) && (left1 < skullLeft + 23) && !_powerUpActive && !_isPlayerMetal)
 	{
 		_skullUsed = true;
 		_skullDebuff->position = new Vector2(-150.0f, -150.0f);
@@ -734,7 +738,7 @@ void Pacman::CheckGhostCollision()
 				_ghosts[i]->direction = 3;
 			else if (_ghosts[i]->direction == 3)
 				_ghosts[i]->direction = 2;
-			_timeBetweenBoxCols = 40;
+			_timeBetweenBoxCols = 60;
 		}
 		if (_timeBetweenBoxCols > 0)
 			_timeBetweenBoxCols--;
@@ -790,7 +794,7 @@ void Pacman::Draw(int elapsedTime)
 	SpriteBatch::Draw(_pill->texture, _pill->position, _pill->sourceRect, Vector2::Zero, 1.0f, 0.0f, Color::White, SpriteEffect::NONE);
 	SpriteBatch::Draw(_skullDebuff->texture, _skullDebuff->position, _skullDebuff->sourceRect, Vector2::Zero, 1.0f, 0.0f, Color::White, SpriteEffect::NONE);
 
-	if (!_playerInsideBox)
+	if (!_playerInsideBox && !_skullDebuffActive)
 		SpriteBatch::Draw(_playerBox->texture, _playerBox->position, _playerBox->sourceRect, Vector2::Zero, 1.0f, 0.0f, Color::White, SpriteEffect::NONE);
 
 	//Draw ghosts
