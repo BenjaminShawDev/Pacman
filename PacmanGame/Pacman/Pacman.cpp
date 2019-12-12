@@ -24,7 +24,7 @@ Pacman::Pacman(int argc, char* argv[], int munchieCount) : Game(argc, argv), _cP
 			_munchies[i]->frameTime = 5000;
 		}
 
-		//Initialise ghost character
+		// Initialise ghost character
 		for (int i = 0; i < GHOSTCOUNT; i++)
 		{
 			_ghosts[i] = new MovingEnemy();
@@ -38,8 +38,8 @@ Pacman::Pacman(int argc, char* argv[], int munchieCount) : Game(argc, argv), _cP
 		_cherry->frameTime = 5000;
 
 		_pill = new Enemy();
-
 		_playerBox = new Enemy();
+		_skullDebuff = new Enemy();
 
 		_paused = false;
 		_pKeyDown = false;
@@ -50,9 +50,12 @@ Pacman::Pacman(int argc, char* argv[], int munchieCount) : Game(argc, argv), _cP
 		_isPlayerMetal = false;
 		_hasPlayerMoved = false;
 		_playerWon = false;
+		_skullDebuffActive = false;
+		_skullUsed = false;
 		_playerScore = 0;
 		_powerUpTime = 0;
 		_timeBetweenBoxCols = 0;
+		_skullMoveCounter = 0;
 
 		_pacman->currentTimeFrame = 0;
 		_pacman->direction = 0;
@@ -66,6 +69,7 @@ Pacman::Pacman(int argc, char* argv[], int munchieCount) : Game(argc, argv), _cP
 		_metalClang = new SoundEffect();
 		_eatCherry = new SoundEffect();
 		_screenWrapAround = new SoundEffect();
+		_skullSound = new SoundEffect();
 
 		Audio::Initialise();
 
@@ -76,7 +80,7 @@ Pacman::Pacman(int argc, char* argv[], int munchieCount) : Game(argc, argv), _cP
 		srand(time(NULL));
 
 		//Initialise important Game aspects
-		Graphics::Initialise(argc, argv, this, 1920, 1080, true, 25, 25, "Pacman", 60);
+		Graphics::Initialise(argc, argv, this, 1920, 1080, false, 25, 25, "Pacman", 60);
 		Input::Initialise();
 
 		// Start the Game Loop - This calls Update and Draw in game loop
@@ -108,6 +112,11 @@ Pacman::~Pacman()
 	delete _pill->texture;
 	delete _pill->sourceRect;
 	delete _pill;
+
+	delete _skullDebuff->position;
+	delete _skullDebuff->texture;
+	delete _skullDebuff->sourceRect;
+	delete _skullDebuff;
 
 	for (int i = 0; i < GHOSTCOUNT; i++)
 	{
@@ -171,6 +180,13 @@ void Pacman::LoadContent()
 	_pill->position = new Vector2(Graphics::GetViewportWidth()/2, Graphics::GetViewportHeight()/2);
 	_pill->sourceRect = new Rect(0.0f, 0.0f, 24, 24);
 
+	Texture2D* skullTex = new Texture2D();
+	skullTex->Load("Textures/SkullDebuff.png", false);
+	_skullDebuff->texture = new Texture2D();
+	_skullDebuff->texture = skullTex;
+	_skullDebuff->position = new Vector2(rand() % 1900 + 10, rand() % 1050 + 10);
+	_skullDebuff->sourceRect = new Rect(0.0f, 0.0f, 24, 24);
+
 	// Load moveable box
 	Texture2D* boxTex = new Texture2D();
 	boxTex->Load("Textures/Box.png", false);
@@ -219,8 +235,12 @@ void Pacman::LoadContent()
 	if (!_screenWrapAround->IsLoaded())
 		cout << "_screenWrapAround sound effect has not loaded" << endl;
 
+	_skullSound->Load("Sounds/skull.wav");
+	if (!_skullSound->IsLoaded())
+		cout << "_skullSound sound effect has not loaded" << endl;
+
 	// Set string position
-	_stringPosition = new Vector2(10.0f, 25.0f);
+	_stringPosition = new Vector2(13.0f, 30.0f);
 
 	// Set Menu Parameters
 	_menuBackground = new Texture2D();
@@ -346,7 +366,9 @@ void Pacman::CheckPaused(Input::KeyboardState * state, Input::Keys pauseKey)
 		if (_paused)
 			Audio::Pause(_backgroundMusic);
 		else if (!_paused)
+		{
 			Audio::Play(_backgroundMusic);
+		}
 	}
 
 	if (state->IsKeyUp(Input::Keys::P) && !_playerWon && !_pacman->dead)
@@ -437,6 +459,7 @@ void Pacman::UpdateMunchie(Enemy*& refMunchie, int elapsedTime)
 	}
 	_cherry->sourceRect->X = _cherry->sourceRect->Width * _cherry->frameCount;
 	_pill->sourceRect->X = _pill->sourceRect->Width * _cherry->frameCount;
+	_skullDebuff->sourceRect->X = _skullDebuff->sourceRect->Width * _cherry->frameCount;
 
 	// Collision with munchie
 	int bottom1 = _pacman->position->Y + _pacman->sourceRect->Height;
@@ -497,6 +520,7 @@ void Pacman::UpdateMunchie(Enemy*& refMunchie, int elapsedTime)
 	int pillRight = _pill->position->X + _pill->sourceRect->Width;
 	int pillTop = _pill->position->Y;
 
+	// Collision with pill
 	if ((bottom1 > pillTop) && (top1 < pillBottom) && (right1 > pillLeft) && (left1 < pillLeft+23) && !_powerUpActive)
 	{
 		Audio::Play(_metalClang);
@@ -513,6 +537,39 @@ void Pacman::UpdateMunchie(Enemy*& refMunchie, int elapsedTime)
 		_isPlayerMetal = false;
 		_pacman->texture->Load("Textures/Pacman.tga", false);
 		Audio::Play(_metalClang);
+	}
+
+	// Collision with skull
+	if (_skullUsed == false && _skullMoveCounter == 15000)
+	{
+		_skullDebuff->position = new Vector2(rand() % 1900 + 10, rand() % 1050 + 10);
+		_skullMoveCounter = 0;
+	}
+	else if (_skullUsed == false && _skullMoveCounter < 15000)
+		_skullMoveCounter++;
+
+	int skullBottom = _skullDebuff->position->Y + _skullDebuff->sourceRect->Height;
+	int skullLeft = _skullDebuff->position->X;
+	int skullRight = _skullDebuff->position->X + _skullDebuff->sourceRect->Width;
+	int skullTop = _skullDebuff->position->Y;
+	if ((bottom1 > skullTop) && (top1 < skullBottom) && (right1 > skullLeft) && (left1 < skullLeft + 23) && !_powerUpActive)
+	{
+		_skullUsed = true;
+		_skullDebuff->position = new Vector2(-150.0f, -150.0f);
+		_skullDebuffActive = true;
+		Audio::Play(_skullSound);
+		_powerUpTime = 30000;
+	}
+
+	if (_skullDebuffActive && _powerUpTime != 0)
+		_powerUpTime--;
+	else if (_skullDebuffActive && _powerUpTime == 0)
+	{
+		for (int i = 0; i < GHOSTCOUNT; i++)
+		{
+			_ghosts[i]->speed = 1.0f;
+		}
+		_skullDebuffActive = false;
 	}
 
 }
@@ -551,30 +608,61 @@ void Pacman::UpdateGhost(MovingEnemy* ghost, int elapsedTime)
 		ghost->sourceRect->X = ghost->sourceRect->Width * ghost->direction;
 	}
 
-	// Ghost hits right edge
-	if (ghost->position->X + ghost->sourceRect->Width >= Graphics::GetViewportWidth())
+	if (!_skullDebuffActive)
 	{
-		ghost->position->Y = (rand() % Graphics::GetViewportHeight() + 30) -30;
-		ghost->direction = 1; 
+		// Ghost hits right edge
+		if (ghost->position->X + ghost->sourceRect->Width >= Graphics::GetViewportWidth())
+		{
+			ghost->position->Y = (rand() % Graphics::GetViewportHeight() + 30) - 30;
+			ghost->direction = 1;
+		}
+		// Ghost hits right edge
+		else if (ghost->position->X <= 0)
+		{
+			ghost->position->Y = (rand() % Graphics::GetViewportHeight() + 30) - 30;
+			ghost->direction = 0;
+		}
+		// Ghost hits bottom edge
+		else if (ghost->position->Y + ghost->sourceRect->Width >= Graphics::GetViewportHeight())
+		{
+			ghost->position->X = (rand() % Graphics::GetViewportWidth() + 30) - 30;
+			ghost->direction = 2; // Change direction
+		}
+		// Ghost hits top edge
+		else if (ghost->position->Y <= 0)
+		{
+			ghost->sourceRect->X = ghost->sourceRect->Width * ghost->direction;
+			ghost->position->X = (rand() % Graphics::GetViewportWidth() + 30) - 30;
+			ghost->direction = 3; // Change direction
+		}
 	}
-	// Ghost hits right edge
-	 else if (ghost->position->X <= 0) 
+
+	else if (_skullDebuffActive)
 	{
-		ghost->position->Y = (rand() % Graphics::GetViewportHeight() + 30) -30;
-		ghost->direction = 0;
-	}
-	// Ghost hits bottom edge
-	else if (ghost->position->Y + ghost->sourceRect->Width >= Graphics::GetViewportHeight())
-	{
-		ghost->position->X = (rand() % Graphics::GetViewportWidth() + 30) -30;
-		ghost->direction = 2; // Change direction
-	}
-	// Ghost hits top edge
-	else if (ghost->position->Y <= 0)
-	{
-		ghost->sourceRect->X = ghost->sourceRect->Width * ghost->direction;
-		ghost->position->X = (rand() % Graphics::GetViewportWidth() + 30) -30;
-		ghost->direction = 3; // Change direction
+		ghost->speed = 0.1f;
+		for (int i = 0; i < GHOSTCOUNT; i++)
+		{
+			if (_ghosts[i]->position->X < _pacman->position->X && _ghosts[i]->position->Y < _pacman->position->Y)
+			{
+				_ghosts[i]->position->X++;
+				_ghosts[i]->position->Y++;
+			}
+			if (_ghosts[i]->position->X > _pacman->position->X&& _ghosts[i]->position->Y < _pacman->position->Y)
+			{
+				_ghosts[i]->position->X--;
+				_ghosts[i]->position->Y++;
+			}
+			if (_ghosts[i]->position->X < _pacman->position->X && _ghosts[i]->position->Y > _pacman->position->Y)
+			{
+				_ghosts[i]->position->X++;
+				_ghosts[i]->position->Y--;
+			}
+			if (_ghosts[i]->position->X > _pacman->position->X && _ghosts[i]->position->Y > _pacman->position->Y)
+			{
+				_ghosts[i]->position->X--;
+				_ghosts[i]->position->Y--;
+			}
+		}
 	}
 }
 
@@ -700,6 +788,7 @@ void Pacman::Draw(int elapsedTime)
 	}
 
 	SpriteBatch::Draw(_pill->texture, _pill->position, _pill->sourceRect, Vector2::Zero, 1.0f, 0.0f, Color::White, SpriteEffect::NONE);
+	SpriteBatch::Draw(_skullDebuff->texture, _skullDebuff->position, _skullDebuff->sourceRect, Vector2::Zero, 1.0f, 0.0f, Color::White, SpriteEffect::NONE);
 
 	if (!_playerInsideBox)
 		SpriteBatch::Draw(_playerBox->texture, _playerBox->position, _playerBox->sourceRect, Vector2::Zero, 1.0f, 0.0f, Color::White, SpriteEffect::NONE);
@@ -727,10 +816,11 @@ void Pacman::Draw(int elapsedTime)
 	if (_playerScore == munchieCount)
 		SpriteBatch::Draw(_endScreenBackground, _endScreenRectangle, nullptr);
 
+
 	if (_pacman->dead)
 		SpriteBatch::Draw(_gameOverBackground, _gameOverRectangle, nullptr);
 
 	// Draws String
-	SpriteBatch::DrawString(stream.str().c_str(), _stringPosition, Color::Green);
+	SpriteBatch::DrawString(stream.str().c_str(), _stringPosition, Color::White);
 	SpriteBatch::EndDraw(); // Ends Drawing
 }

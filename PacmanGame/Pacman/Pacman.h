@@ -8,7 +8,6 @@
 #endif
 #endif
 
-#define MUNCHIECOUNT 50
 #define GHOSTCOUNT 4
 
 // Just need to include main header file
@@ -108,6 +107,10 @@ private:
 	bool _powerUpActive;
 	int _powerUpTime;
 	Enemy* _pill;
+	Enemy* _skullDebuff;
+	bool _skullDebuffActive;
+	bool _skullUsed;
+	int _skullMoveCounter;
 
 	// Data to represet moveable box
 	Enemy* _playerBox;
@@ -124,6 +127,7 @@ private:
 	SoundEffect* _metalClang;
 	SoundEffect* _eatCherry;
 	SoundEffect* _screenWrapAround;
+	SoundEffect* _skullSound;
 
 public:
 	/// <summary> Constructs the Pacman class. </summary>
